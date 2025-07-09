@@ -1,0 +1,107 @@
+#Hardcoded stock prices
+stock_prices = {
+    "AAPL": 180,
+    "TSLA": 250,
+    "GOOGL": 140,
+    "AMZN": 130,
+    "MSFT": 350
+}
+
+total = 0
+portfolio = {}
+
+#input screen
+print("Available stocks: AAPL, TSLA, GOOGL, AMZN, MSFT")
+print("Type 'done' to finish.\n")
+
+#start an infinite loop
+while True:
+    stock = input("Enter stock name: ").upper()
+    if stock == "DONE":
+        break #exits the loop upon inputting "done"
+    if stock not in stock_prices:
+        print("Stock not found.") #for if the user inputs wrong stock name
+        continue
+
+    qty = int(input("Enter quantity (Positive to buy, Negative to sell): "))
+    
+    #validate overselling to prevent negative result
+    if stock in portfolio and portfolio[stock] + qty < 0:
+        print("Error: You cannot sell more than you own.")
+        continue
+    if stock not in portfolio and qty < 0:
+        print("Error: You don't own any to sell.")
+        continue
+    if qty == 0:
+        print("Quantity cannot be zero.")
+        continue
+
+    price = stock_prices[stock]
+    cost = price * qty
+    total += cost
+
+    # Update portfolio
+    if stock in portfolio:
+        portfolio[stock] += qty
+    else:
+        portfolio[stock] = qty
+
+    print(stock, ":", qty, "× $", price, "=", cost)
+    print("Running total: $", total)
+    print("Current",stock,"shares:",portfolio[stock],"\n")
+
+# Final investment summary
+print("----- Final Investment Summary -----")
+for stock in portfolio:
+    qty = portfolio[stock]
+    if qty == 0:
+        continue  # Skip stocks with zero balance
+    price = stock_prices[stock]
+    cost = qty * price
+    print(stock, ":", qty, "shares × $", price, "=", cost)
+
+print("Total Investment: $", total)
+
+# Ask to save (using Boolean conversion)
+while True:
+    response = input("\nDo you want to save the summary? (yes/no): ").lower()
+    if response == "yes" or response == "no":
+        save_summary = (response == "yes")
+        break
+    print("Please enter 'yes' or 'no'.")
+
+if save_summary:
+    while True:
+        file_type = input("Save as .txt or .csv? (txt/csv): ").lower() #asking whether to save as .txt or as .csv
+        if file_type == "txt" or file_type == "csv":
+            break
+        print("Please enter 'txt' or 'csv'.") #in case user types something other than .txt or .csv
+
+    if file_type == "txt":
+        with open("investment_summary.txt", "w") as file:
+            file.write("Investment Summary\n")
+            for stock in portfolio:
+                qty = portfolio[stock]
+                if qty == 0:
+                    continue
+                price = stock_prices[stock]
+                cost = qty * price
+                file.write(stock + ": " + str(qty) + " shares × $" + str(price) + " = $" + str(cost) + "\n")
+            file.write("Total Investment: $" + str(total) + "\n")
+        print("Saved to investment_summary.txt")
+
+    elif file_type == "csv":
+        with open("investment_summary.csv", "w") as file:
+            file.write("Stock,Quantity,Price,Total\n")
+            for stock in portfolio:
+                qty = portfolio[stock]
+                if qty == 0:
+                    continue
+                price = stock_prices[stock]
+                cost = qty * price
+                file.write(stock + "," + str(qty) + "," + str(price) + "," + str(cost) + "\n")
+            file.write(",,,Total Investment: $" + str(total) + "\n")
+        print("Saved to investment_summary.csv")
+
+else:
+    print("Okay, the summary was not saved.") #if no
